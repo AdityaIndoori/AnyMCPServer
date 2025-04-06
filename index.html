@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Server Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>MCP Server Generator Wizard</h1>
+
+    <div id="wizard">
+        <!-- Step 1: Server Information -->
+        <div class="step" id="step-1">
+            <h2>Step 1: Server Information</h2>
+            <label for="server-name">Server Name:</label>
+            <input type="text" id="server-name" placeholder="e.g., my-tool-server" required><br><br>
+
+            <label for="server-version">Server Version:</label>
+            <input type="text" id="server-version" placeholder="e.g., 0.1.0" value="0.1.0" required><br><br>
+
+            <button type="button" onclick="nextStep(1)">Next</button>
+        </div>
+
+        <!-- Step 2: Define Tools -->
+        <div class="step" id="step-2" style="display: none;">
+            <h2>Step 2: Define Tools</h2>
+            <div id="tools-list">
+                <!-- Tools will be added here dynamically -->
+            </div>
+            <button type="button" onclick="addTool()">Add Tool</button>
+            <hr>
+            <button type="button" onclick="prevStep(2)">Previous</button>
+            <button type="button" onclick="nextStep(2)">Next</button>
+        </div>
+
+        <!-- Step 3: Generate & Download -->
+        <div class="step" id="step-3" style="display: none;">
+            <h2>Step 3: Generate & Download</h2>
+            <p>Review your configuration:</p>
+            <div id="summary">
+                <!-- Summary will be populated here -->
+            </div>
+            <button type="button" onclick="generateFiles()">Generate Files</button>
+            <div id="download-links" style="margin-bottom: 15px;">
+                <!-- Download links will appear here -->
+            </div>
+
+            <label for="index-ts-preview">Generated index.ts Code:</label>
+            <textarea id="index-ts-preview" rows="10" style="width: calc(100% - 22px); margin-bottom: 15px;" readonly></textarea>
+
+            <p style="background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 10px; border-radius: 4px;">
+                <strong>Important:</strong> The generated code above (<code>index.ts</code>) contains placeholder comments (<code>// TODO: ...</code>) where you **must** add your specific tool logic. Please read the generated <code>README.md</code> for detailed instructions before running the server.
+            </p>
+            <hr>
+            <button type="button" onclick="prevStep(3)">Previous</button>
+        </div>
+    </div>
+
+    <!-- Load script files in order -->
+    <script src="navigation.js"></script>
+    <script src="ui_manager.js"></script>
+    <script src="summary.js"></script>
+    <script src="file_generator.js"></script>
+    <script src="script.js"></script> <!-- Main initializer, load last -->
+</body>
+</html>
