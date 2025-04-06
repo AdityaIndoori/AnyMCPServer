@@ -21,13 +21,13 @@ function addTool() {
         <input type="text" id="${toolId}-name" placeholder="e.g., add_numbers" required><br><br>
 
         <label for="${toolId}-desc">Description:</label>
-        <textarea id="${toolId}-desc" rows="2" style="width: calc(100% - 22px); margin-bottom: 10px;"></textarea><br>
+        <textarea id="${toolId}-desc" rows="2"></textarea><br> <!-- Removed inline style -->
 
         <h5>Parameters:</h5>
         <div id="${toolId}-params-list" class="params-list">
             <!-- Parameters will be added here -->
         </div>
-        <button type="button" onclick="addParameter('${toolId}')">Add Parameter</button>
+        <button type="button" class="add-param-btn" onclick="addParameter('${toolId}')">Add Parameter</button> <!-- Added class -->
     `;
     toolsList.appendChild(toolDiv);
 }

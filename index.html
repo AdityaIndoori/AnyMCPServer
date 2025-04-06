@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCP Server Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <!-- Add JSZip and FileSaver libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -26,7 +29,7 @@
         </div>
 
         <!-- Step 2: Define Tools -->
-        <div class="step" id="step-2" style="display: none;">
+        <div class="step step-hidden" id="step-2"> <!-- Added step-hidden class, removed inline style -->
             <h2>Step 2: Define Tools</h2>
             <div id="tools-list">
                 <!-- Tools will be added here dynamically -->
@@ -38,7 +41,7 @@
         </div>
 
         <!-- Step 3: Generate & Download -->
-        <div class="step" id="step-3" style="display: none;">
+        <div class="step step-hidden" id="step-3"> <!-- Added step-hidden class, removed inline style -->
             <h2>Step 3: Generate & Download</h2>
             <p>Review your configuration:</p>
             <div id="summary">
@@ -52,9 +55,9 @@
             <button type="button" id="download-all-button" style="display: none; margin-top: 10px; margin-bottom: 15px;" onclick="downloadAllFiles()">Download All Files (.zip)</button>
 
             <label for="index-ts-preview">Generated index.ts Code:</label>
-            <textarea id="index-ts-preview" rows="10" style="width: calc(100% - 22px); margin-bottom: 15px;" readonly></textarea>
+            <textarea id="index-ts-preview" rows="10" readonly></textarea> <!-- Removed inline style, handled by CSS -->
 
-            <p style="background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 10px; border-radius: 4px;">
+            <p class="important-notice"> <!-- Added class, removed inline style -->
                 <strong>Important:</strong> The generated code above (<code>index.ts</code>) contains placeholder comments (<code>// TODO: ...</code>) where you **must** add your specific tool logic. Please read the generated <code>README.md</code> for detailed instructions before running the server.
             </p>
             <hr>

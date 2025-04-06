@@ -1,121 +1,301 @@
-body {
-    font-family: sans-serif;
-    line-height: 1.6;
-    margin: 20px;
-    background-color: #f4f4f4;
+:root {
+    --primary-color: #6200EE; /* Deep Purple */
+    --primary-variant: #3700B3;
+    --secondary-color: #03DAC6; /* Teal */
+    --background-color: #f8f9fa; /* Light Gray */
+    --surface-color: #ffffff;
+    --error-color: #B00020;
+    --on-primary: #ffffff;
+    --on-secondary: #000000;
+    --on-background: #000000;
+    --on-surface: #000000;
+    --on-error: #ffffff;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --input-bg: #fff;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    --shadow-md: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    --border-radius: 6px;
+    --transition-speed: 0.2s;
 }
 
-h1, h2 {
-    color: #333;
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 30px;
+    background-color: var(--background-color);
+    color: var(--on-background);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-variant);
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+h2 {
+    color: var(--primary-color);
+    font-weight: 500;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
 }
 
 #wizard {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    max-width: 700px;
-    margin: 20px auto;
+    background: var(--surface-color);
+    padding: 30px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    max-width: 800px;
+    margin: 30px auto;
+    overflow: hidden; /* Contain child margins */
 }
 
 .step {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
+    padding: 20px 0; /* Vertical padding only */
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 20px; /* Space between steps */
+    opacity: 1;
+    visibility: visible; /* Make visible by default */
+    transition: opacity var(--transition-speed) ease-in-out, visibility 0s linear 0s; /* Transition opacity, snap visibility */
+    /* Ensure block display */
+    display: block;
 }
 
 .step:last-child {
     border-bottom: none;
+    margin-bottom: 0;
 }
 
+/* Styling for hidden steps using class */
+.step-hidden {
+    opacity: 0;
+    visibility: hidden; /* Hide visually and from interactions */
+    pointer-events: none; /* Extra safety for interactions */
+    /* Remove from layout flow *after* transition */
+    transition: opacity var(--transition-speed) ease-in-out, visibility 0s linear var(--transition-speed);
+    /* Ensure it doesn't take up space when hidden */
+    height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border: none;
+    overflow: hidden; /* Prevent content spillover */
+}
+
+/* Remove the redundant .step override block below */
+
+
 label {
-    display: inline-block;
-    margin-bottom: 5px;
-    font-weight: bold;
+    display: block; /* Make labels block for better spacing */
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--on-surface);
 }
 
 input[type="text"],
-select {
-    width: calc(100% - 22px); /* Adjust for padding/border */
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+select,
+textarea {
+    width: 100%; /* Use 100% width */
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-sizing: border-box; /* Include padding and border in width */
+    font-size: 1rem;
+    background-color: var(--input-bg);
+    color: var(--on-surface);
+    transition: border-color var(--transition-speed) ease-in-out, box-shadow var(--transition-speed) ease-in-out;
+}
+
+input[type="text"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(98, 0, 238, 0.2); /* Subtle focus ring */
+}
+
+textarea {
+    resize: vertical; /* Allow vertical resize */
+    min-height: 120px;
 }
 
 button {
-    background-color: #5cb85c;
-    color: white;
-    padding: 10px 15px;
+    background-color: var(--primary-color);
+    color: var(--on-primary);
+    padding: 12px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     cursor: pointer;
-    margin-right: 5px;
+    margin-right: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color var(--transition-speed) ease-in-out, transform var(--transition-speed) ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 button:hover {
-    background-color: #4cae4c;
+    background-color: var(--primary-variant);
+    transform: translateY(-1px); /* Subtle lift effect */
 }
 
-button[type="button"] {
-   background-color: #007bff;
+button:active {
+    transform: translateY(0); /* Press effect */
 }
-button[type="button"]:hover {
-   background-color: #0056b3;
+
+/* Specific button types */
+button.add-tool-btn { /* Assuming you might add a class */
+    background-color: var(--secondary-color);
+    color: var(--on-secondary);
+}
+button.add-tool-btn:hover {
+    background-color: darken(var(--secondary-color), 10%);
 }
 
 button.remove-btn {
-    background-color: #d9534f;
-    font-size: 0.8em;
-    padding: 5px 10px;
+    background-color: var(--error-color);
+    color: var(--on-error);
+    font-size: 0.85em;
+    padding: 6px 12px;
     margin-left: 10px;
+    text-transform: none;
+    letter-spacing: normal;
 }
 button.remove-btn:hover {
-    background-color: #c9302c;
+    background-color: darken(var(--error-color), 10%);
+}
+
+/* Style Previous buttons differently */
+button.prev-btn { /* Add this class in HTML if needed, or use attribute selector */
+    background-color: var(--text-muted);
+}
+button.prev-btn:hover {
+    background-color: darken(var(--text-muted), 10%);
+}
+/* Example using attribute selector if you don't add classes */
+button[onclick^="prevStep"] {
+     background-color: var(--text-muted);
+     color: var(--on-primary);
+}
+button[onclick^="prevStep"]:hover {
+     background-color: #5a6268; /* Use a specific darker gray */
 }
 
 
 hr {
-    margin: 20px 0;
+    margin: 30px 0;
     border: 0;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-color);
 }
 
-#tools-list .tool-definition,
-#tools-list .parameter-definition {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    background-color: #f9f9f9;
+#tools-list .tool-definition {
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: var(--border-radius);
+    background-color: var(--surface-color); /* Keep it clean */
+    box-shadow: var(--shadow-sm);
+    position: relative; /* For potential absolute positioning of remove button */
 }
 
 #tools-list .tool-definition h4 {
     margin-top: 0;
-    color: #555;
+    margin-bottom: 15px;
+    color: var(--primary-variant);
+    font-weight: 600;
 }
 
 #tools-list .parameter-definition {
-    margin-left: 20px;
-    background-color: #fff;
+    border: 1px dashed var(--border-color); /* Dashed border for distinction */
+    padding: 15px;
+    margin-top: 15px;
+    margin-left: 0; /* Align with parent */
+    margin-bottom: 15px;
+    border-radius: var(--border-radius);
+    background-color: var(--background-color); /* Slightly different background */
 }
 
 #summary {
-    background-color: #e9ecef;
+    background-color: #e9ecef; /* Keep light gray or use a subtle variant */
+    padding: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 25px;
+    border: 1px solid var(--border-color);
+    color: var(--on-surface);
+}
+#summary h3 {
+    margin-top: 0;
+    color: var(--primary-variant);
+}
+#summary p {
+    margin-bottom: 5px;
+}
+#summary strong {
+    color: var(--primary-color);
+}
+
+/* Important message box styling */
+.important-notice { /* Add this class to the <p> tag in HTML */
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
     padding: 15px;
-    border-radius: 4px;
-    margin-bottom: 15px;
+    border-radius: var(--border-radius);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+.important-notice strong {
+    color: #664d03;
+}
+.important-notice code {
+    background-color: rgba(0,0,0,0.05);
+    padding: 2px 4px;
+    border-radius: 3px;
 }
 
-#download-links a {
-    display: inline-block;
-    margin: 10px 10px 0 0;
-    padding: 10px 15px;
-    background-color: #337ab7;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
+/* Remove default download link styles if element is removed */
+/* #download-links a { ... } */
+
+#download-all-button {
+    /* Style already covered by general button rules */
+    /* Add specific overrides if needed */
+    margin-top: 15px;
+    margin-bottom: 20px;
+    display: inline-block; /* Ensure it behaves like other buttons */
 }
 
-#download-links a:hover {
-    background-color: #286090;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+    #wizard {
+        padding: 20px;
+    }
+    h1 {
+        font-size: 1.8rem;
+    }
+    h2 {
+        font-size: 1.4rem;
+    }
+    button {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        margin-bottom: 10px; /* Stack buttons nicely on small screens */
+        margin-right: 5px;
+    }
+    input[type="text"],
+    select,
+    textarea {
+        padding: 10px 12px;
+        font-size: 0.95rem;
+    }
 }

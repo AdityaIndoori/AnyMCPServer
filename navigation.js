@@ -1,13 +1,18 @@
 let currentStep = 1;
+const steps = document.querySelectorAll('.step'); // Cache the steps
 
 function showStep(stepNumber) {
-    // Hide all steps
-    document.querySelectorAll('.step').forEach(step => step.style.display = 'none');
+    // Hide all steps by adding the hidden class
+    steps.forEach(step => {
+        if (!step.classList.contains('step-hidden')) {
+            step.classList.add('step-hidden');
+        }
+    });
 
-    // Show the target step
+    // Show the target step by removing the hidden class
     const stepToShow = document.getElementById(`step-${stepNumber}`);
     if (stepToShow) {
-        stepToShow.style.display = 'block';
+        stepToShow.classList.remove('step-hidden');
         currentStep = stepNumber;
         // If moving to step 3, update the summary (assuming updateSummary is globally available or imported)
         if (stepNumber === 3 && typeof updateSummary === 'function') {
