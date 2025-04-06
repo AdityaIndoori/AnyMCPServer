@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MCP Server Generator</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Add JSZip and FileSaver libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
     <h1>MCP Server Generator Wizard</h1>
@@ -42,9 +45,11 @@
                 <!-- Summary will be populated here -->
             </div>
             <button type="button" onclick="generateFiles()">Generate Files</button>
-            <div id="download-links" style="margin-bottom: 15px;">
+            <!-- Remove individual download links container -->
+            <!-- <div id="download-links" style="margin-bottom: 15px;"> -->
                 <!-- Download links will appear here -->
-            </div>
+            <!-- </div> -->
+            <button type="button" id="download-all-button" style="display: none; margin-top: 10px; margin-bottom: 15px;" onclick="downloadAllFiles()">Download All Files (.zip)</button>
 
             <label for="index-ts-preview">Generated index.ts Code:</label>
             <textarea id="index-ts-preview" rows="10" style="width: calc(100% - 22px); margin-bottom: 15px;" readonly></textarea>

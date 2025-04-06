@@ -221,37 +221,24 @@ function generateTsconfigJsonContent() {
     return JSON.stringify(content, null, 2);
 }
 
-// Function to create download links
-function createDownloadLink(filename, content, mimeType) {
-    try {
-        const blob = new Blob([content], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        a.textContent = 'Download ' + filename; // Use concatenation
-        return a;
-    } catch (error) {
-        console.error('Error creating download link for ' + filename + ':', error); // Use concatenation
-        const errorP = document.createElement('p');
-        errorP.style.color = 'red';
-        errorP.textContent = 'Error creating download link for ' + filename + '.'; // Use concatenation
-        return errorP;
-    }
-}
+// Global variable to store generated file data for zipping
+let generatedFilesData = null;
 
 // Main function to generate all files
 function generateFiles() {
     console.log("Gathering data and generating files...");
-    const downloadLinksDiv = document.getElementById('download-links');
+    // const downloadLinksDiv = document.getElementById('download-links'); // No longer needed for links
     const indexTsPreview = document.getElementById('index-ts-preview');
+    const downloadAllButton = document.getElementById('download-all-button'); // Get the new button
 
-    if (!downloadLinksDiv || !indexTsPreview) {
-        console.error("Required elements (download-links or index-ts-preview) not found.");
+    if (!indexTsPreview || !downloadAllButton) { // Check for new button
+        console.error("Required elements (index-ts-preview or download-all-button) not found.");
         return;
     }
-    downloadLinksDiv.innerHTML = ''; // Clear previous links
+    // downloadLinksDiv.innerHTML = ''; // Clear previous links - No longer needed
     indexTsPreview.value = ''; // Clear preview
+    downloadAllButton.style.display = 'none'; // Hide button initially
+    generatedFilesData = null; // Reset stored data
 
     // 1. Gather Data
     const serverNameInput = document.getElementById('server-name');
@@ -312,18 +299,68 @@ function generateFiles() {
         // 3. Populate Preview
         indexTsPreview.value = indexTsContent;
 
-        // 4. Create Download Links
-        downloadLinksDiv.appendChild(createDownloadLink('README.md', readmeContent, 'text/markdown'));
-        downloadLinksDiv.appendChild(createDownloadLink('package.json', packageJsonContent, 'application/json'));
-        downloadLinksDiv.appendChild(createDownloadLink('tsconfig.json', tsconfigJsonContent, 'application/json'));
-        downloadLinksDiv.appendChild(createDownloadLink('index.ts', indexTsContent, 'text/typescript'));
+        // 4. Store generated data for zipping
+        generatedFilesData = {
+            serverName: serverInfo.name || 'my-mcp-server',
+            readme: readmeContent,
+            packageJson: packageJsonContent,
+            tsconfig: tsconfigJsonContent,
+            indexTs: indexTsContent
+        };
 
-        downloadLinksDiv.insertAdjacentHTML('beforeend', '<p><small>Download all files. Place <code>index.ts</code> inside a <code>src/</code> directory. Read <code>README.md</code> for setup and implementation instructions.</small></p>');
+        // 5. Show the Download All button
+        downloadAllButton.style.display = 'inline-block'; // Or 'block' depending on desired layout
 
     } catch (error) {
         console.error("Error generating files:", error);
         alert("An error occurred during file generation. Check the console for details.");
-        // Use concatenation for error message display
-        downloadLinksDiv.innerHTML = '<p style="color: red;">Error generating files: ' + (error instanceof Error ? error.message : String(error)) + '</p>';
+        // Display error in a more robust way if needed, e.g., dedicated error div
+        const summaryDiv = document.getElementById('summary'); // Example: show error near summary
+        if (summaryDiv) {
+             summaryDiv.innerHTML = '<p style="color: red;">Error generating files: ' + (error instanceof Error ? error.message : String(error)) + '</p>';
+        }
+        generatedFilesData = null; // Ensure no partial data is available for download
+        downloadAllButton.style.display = 'none'; // Hide button on error
+    }
+}
+
+// Function to download all files as a zip
+function downloadAllFiles() {
+    if (!generatedFilesData) {
+        alert("Please generate the files first.");
+        return;
+    }
+    if (typeof JSZip === 'undefined' || typeof saveAs === 'undefined') {
+        alert("Error: Required libraries (JSZip or FileSaver) not loaded.");
+        console.error("JSZip or FileSaver not found. Make sure they are included in the HTML.");
+        return;
+    }
+
+    console.log("Creating zip file...");
+    try {
+        const zip = new JSZip();
+        const safeServerName = generatedFilesData.serverName.replace(/[^a-z0-9_-]/gi, '_'); // Sanitize name for zip file
+
+        // Add files to zip
+        zip.file("README.md", generatedFilesData.readme);
+        zip.file("package.json", generatedFilesData.packageJson);
+        zip.file("tsconfig.json", generatedFilesData.tsconfig);
+        // Create src directory and add index.ts inside it
+        zip.folder("src").file("index.ts", generatedFilesData.indexTs);
+
+        // Generate the zip file asynchronously
+        zip.generateAsync({ type: "blob" })
+            .then(function(content) {
+                // Trigger download using FileSaver.js
+                saveAs(content, safeServerName + "_mcp_server.zip");
+                console.log("Zip file download initiated.");
+            })
+            .catch(function (err) {
+                console.error("Error generating zip file:", err);
+                alert("Error creating zip file: " + err.message);
+            });
+    } catch (error) {
+        console.error("Error during zipping process:", error);
+        alert("An unexpected error occurred while creating the zip file.");
     }
 }
