@@ -54,11 +54,10 @@
             <!-- </div> -->
             <button type="button" id="download-all-button" style="display: none; margin-top: 10px; margin-bottom: 15px;" onclick="downloadAllFiles()">Download All Files (.zip)</button>
 
-            <label for="index-ts-preview">Generated index.ts Code:</label>
-            <textarea id="index-ts-preview" rows="10" readonly></textarea> <!-- Removed inline style, handled by CSS -->
+            <!-- Removed index.ts preview label and textarea -->
 
             <p class="important-notice"> <!-- Added class, removed inline style -->
-                <strong>Important:</strong> The generated code above (<code>index.ts</code>) contains placeholder comments (<code>// TODO: ...</code>) where you **must** add your specific tool logic. Please read the generated <code>README.md</code> for detailed instructions before running the server.
+                <strong>Important:</strong> After downloading, you **must** implement your custom tool logic in the generated <code>src/tool_logic.ts</code> file. Please read the generated <code>README.md</code> for detailed instructions before running the server.
             </p>
             <hr>
             <button type="button" onclick="prevStep(3)">Previous</button>
