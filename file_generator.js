@@ -10,7 +10,8 @@ function generateReadmeContent(serverInfo, toolsData) {
         '',
         '*   `package.json`: Defines project metadata, dependencies, and scripts.',
         '*   `tsconfig.json`: Configures the TypeScript compiler.',
-        '*   `src/index.ts`: **This is the main server code. You need to edit this file.**',
+        '*   `src/index.ts`: The main server entry point (usually no edits needed here).',
+        '*   `src/tool_logic.ts`: **Implement your custom tool logic in this file.**',
         '',
         '## Getting Started',
         '',
@@ -25,24 +26,12 @@ function generateReadmeContent(serverInfo, toolsData) {
         '',
         '**2. Implement Tool Logic:**',
         '',
-        '*   Open `src/index.ts` in your code editor.',
-        '*   Find the sections marked with `/* TODO: IMPLEMENT YOUR TOOL LOGIC HERE */`.',
-        '*   For each tool you defined:'
-    ];
-
-    if (toolsData.length > 0) {
-        toolsData.forEach(tool => {
-            const safeToolName = tool.name || 'unnamed_tool';
-            lines.push('    *   **Tool: `' + safeToolName + '`**: Replace the placeholder logic inside the `(args: any) => { ... }` function with the actual code your tool needs to execute.');
-        });
-    } else {
-        lines.push('    *   You haven\'t defined any tools yet. You can add them manually following the pattern in `index.ts` or regenerate the server.');
-    }
-
-    lines.push(
+        '*   Open `src/tool_logic.ts` in your code editor.',
+        '*   Find the handler function for each tool you defined (e.g., `handle_yourToolName`).',
+        '*   Replace the placeholder logic within each handler function with your actual code.',
         '',
-        '*   **Return Value:** Your tool logic *must* return an object matching the MCP specification:',
-        '    *   **On Success:** Return `{ content: [{ type: "text", text: "Your result here" }], isError: false }`. The `content` array can hold different types as per the spec, but text is common.',
+        '*   **Return Value:** Each handler function *must* return a Promise resolving to an object matching the MCP specification:',
+        '    *   **On Success:** Return `{ content: [{ type: "text", text: "Your result here" }], isError: false }`,', // The `content` array can hold different types as per the spec, but text is common.
         '    *   **On Failure:** Return `{ content: [{ type: "text", text: "Error description here" }], isError: true }`.',
         '',
         '**3. Build the Server:**',
@@ -58,7 +47,7 @@ function generateReadmeContent(serverInfo, toolsData) {
         '**5. Connecting to a Client (Example: Claude Desktop):**',
         '',
         '*   To use this server with Claude Desktop, you need to add it to the Claude configuration file (`claude_desktop_config.json`). See the [MCP Quickstart for Claude Users](https://modelcontextprotocol.io/quickstart/user) or [Server Developers](https://modelcontextprotocol.io/quickstart/server) for details on how to configure the `command` and `args` to run your server (using `node build/index.js` or potentially `npm run start` depending on your setup). Remember to use the **absolute path** to your project directory in the configuration.'
-    );
+    ];
 
     return lines.join('\n');
 }
@@ -73,6 +62,8 @@ function generateIndexTsContent(serverInfo, toolsData) {
         'import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";',
         'import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";',
         toolsData.length > 0 ? 'import { z } from "zod";' : '',
+        // Import handlers from the dedicated logic file (using .js extension for compiled output)
+        toolsData.length > 0 ? 'import { toolHandlers } from "./tool_logic.js";' : '',
         '',
         'const server = new McpServer({',
         '    name: "' + safeServerName + '",',
@@ -113,28 +104,14 @@ function generateIndexTsContent(serverInfo, toolsData) {
             '    "' + safeToolName + '",',
             '    "' + safeToolDesc + '",',
             '    ' + schemaString + ',',
-            '    // Simplified placeholder handler',
-            '    (args: any) => {',
-            '        /* TODO: IMPLEMENT YOUR TOOL LOGIC FOR \'' + safeToolName + '\' HERE.',
-            '         * See the generated README.md for detailed instructions.',
-            '         * Access parameters via the \'args\' object (e.g., args.' + (tool.params[0]?.name?.replace(/[^a-zA-Z0-9_]/g, '_') || 'param1') + ').',
-            '         * Remember to handle potential errors using try...catch.',
-            '         * Return an object like:',
-            '         *   { content: [{ type: "text", text: "Success result" }], isError: false }',
-            '         * or on error:',
-            '         *   { content: [{ type: "text", text: "Error message" }], isError: true }',
-            '         */',
-            '',
-            '        console.log("Executing tool \'' + safeToolName + '\' with input:", args);',
-            '',
-            '        // --- VERY BASIC PLACEHOLDER ---',
-            '        // Replace this entire block with your actual logic and error handling',
-            '        const placeholderResult = "Placeholder result for ' + safeToolName + '";',
-            '        return {',
-            '            content: [{ type: "text", text: placeholderResult }],',
-            '            isError: false',
-            '        };',
-            '        // --- END BASIC PLACEHOLDER ---',
+            '    // Call the corresponding handler from tool_logic.js',
+            '    async (args: any) => {',
+            '        if (!toolHandlers || typeof toolHandlers["' + safeToolName + '"] !== "function") {',
+            '           console.error(`Handler for tool ${' + safeToolName + '} not found or not a function in tool_logic.js`);',
+            '           return { content: [{ type: "text", text: `Internal server error: Handler for ${' + safeToolName + '} is missing.` }], isError: true };',
+            '        }',
+            '        // Directly call the imported handler',
+            '        return await toolHandlers["' + safeToolName + '"](args);',
             '    }',
             ');',
             ''
@@ -200,6 +177,93 @@ function generatePackageJsonContent(serverInfo) {
     };
     return JSON.stringify(content, null, 2);
 }
+
+// Function to generate src/tool_logic.ts content
+function generateToolLogicTsContent(toolsData) {
+    const handlers = toolsData.map(tool => {
+        const safeToolName = tool.name?.replace(/[^a-zA-Z0-9_]/g, '_') || 'unnamed_tool';
+        const paramNames = tool.params.map(p => p.name?.replace(/[^a-zA-Z0-9_]/g, '_') || 'unnamed_param');
+        // Generate a basic Zod-like type hint string for the comment
+        const paramsTypeHint = tool.params.map(p => `${p.name?.replace(/[^a-zA-Z0-9_]/g, '_')}${p.required ? '' : '?'}: ${p.type === 'number' ? 'number' : p.type === 'boolean' ? 'boolean' : 'string'}`).join(', ');
+        const argsSignature = tool.params.length > 0 ? `{ ${paramNames.join(', ')} }: { ${paramsTypeHint} }` : 'args: any';
+
+        return `
+/**
+ * Handler function for the '${safeToolName}' tool.
+ * @param ${argsSignature} - The arguments passed to the tool, matching the defined parameters.
+ * @returns {Promise<{ content: { type: string, text: string }[], isError: boolean }>} - The result or error object.
+ */
+async function handle_${safeToolName}(${argsSignature}) {
+    console.log("Executing tool logic for '${safeToolName}' with input:", ${tool.params.length > 0 ? `{ ${paramNames.join(', ')} }` : 'args'});
+
+    // --- IMPLEMENT YOUR TOOL LOGIC FOR '${safeToolName}' HERE ---
+    // Access parameters directly (e.g., ${paramNames[0] || 'param1'}).
+    // Remember to handle potential errors using try...catch.
+    // Return an object like:
+    //   { content: [{ type: "text", text: "Success result" }], isError: false }
+    // or on error:
+    //   { content: [{ type: "text", text: "Error message" }], isError: true }
+
+    try {
+        // Example placeholder logic: Replace this with your actual implementation.
+        const placeholderResult = "Successfully executed ${safeToolName} with params: " + JSON.stringify(${tool.params.length > 0 ? `{ ${paramNames.join(', ')} }` : 'args'});
+
+        // Simulate async operation if needed
+        // await new Promise(resolve => setTimeout(resolve, 100));
+
+        return {
+            content: [{ type: "text", text: placeholderResult }],
+            isError: false
+        };
+
+    } catch (error) {
+        console.error("Error in tool '${safeToolName}':", error);
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        return {
+            content: [{ type: "text", text: \`Error executing ${safeToolName}: \${errorMessage}\` }],
+            isError: true
+        };
+    }
+    // --- END TOOL LOGIC ---
+}`;
+    });
+
+    const exportLines = toolsData.map(tool => {
+        const safeToolName = tool.name?.replace(/[^a-zA-Z0-9_]/g, '_') || 'unnamed_tool';
+        // Use the actual tool name as the key in the exported object
+        return `    "${tool.name || 'unnamed_tool'}": handle_${safeToolName},`;
+    });
+
+    const header = [
+        '// src/tool_logic.ts',
+        '// This file is where you implement the logic for your MCP server tools.',
+        '',
+        '// Import any necessary modules here',
+        '// Example: import fs from \'fs/promises\';',
+        '',
+        '// Define types for tool arguments if needed for better type safety',
+        '// Example: type MyToolArgs = { name: string; count?: number };',
+        '',
+    ];
+
+    const footer = [
+        '',
+        '// Export all handlers wrapped in an object.',
+        '// The keys MUST match the tool names defined in the MCP server setup (index.ts).',
+        'export const toolHandlers = {',
+        ...exportLines,
+        '};',
+        '',
+    ];
+
+    // Handle case where no tools are defined
+    if (toolsData.length === 0) {
+        return header.join('\n') + '\n// No tools defined. Add tools via the generator or manually implement handlers here and update index.ts.\n' + footer.join('\n');
+    }
+
+    return header.join('\n') + handlers.join('\n\n') + footer.join('\n');
+}
+
 
 // Function to generate tsconfig.json content
 function generateTsconfigJsonContent() {
@@ -292,12 +356,14 @@ function generateFiles() {
     // 2. Generate Content
     try {
         const indexTsContent = generateIndexTsContent(serverInfo, toolsData);
+        // Removed duplicate declaration below
         const packageJsonContent = generatePackageJsonContent(serverInfo);
         const tsconfigJsonContent = generateTsconfigJsonContent();
         const readmeContent = generateReadmeContent(serverInfo, toolsData);
+        const toolLogicTsContent = generateToolLogicTsContent(toolsData); // Generate new file content
 
         // 3. Populate Preview
-        indexTsPreview.value = indexTsContent;
+        indexTsPreview.value = indexTsContent; // Keep previewing index.ts
 
         // 4. Store generated data for zipping
         generatedFilesData = {
@@ -305,7 +371,8 @@ function generateFiles() {
             readme: readmeContent,
             packageJson: packageJsonContent,
             tsconfig: tsconfigJsonContent,
-            indexTs: indexTsContent
+            indexTs: indexTsContent,
+            toolLogicTs: toolLogicTsContent // Store new file content
         };
 
         // 5. Show the Download All button
@@ -345,8 +412,15 @@ function downloadAllFiles() {
         zip.file("README.md", generatedFilesData.readme);
         zip.file("package.json", generatedFilesData.packageJson);
         zip.file("tsconfig.json", generatedFilesData.tsconfig);
-        // Create src directory and add index.ts inside it
-        zip.folder("src").file("index.ts", generatedFilesData.indexTs);
+        // Create src directory and add index.ts and tool_logic.ts inside it
+        const srcFolder = zip.folder("src");
+        if (srcFolder) {
+            srcFolder.file("index.ts", generatedFilesData.indexTs);
+            srcFolder.file("tool_logic.ts", generatedFilesData.toolLogicTs); // Add the new file
+        } else {
+             throw new Error("Could not create src folder in zip.");
+        }
+
 
         // Generate the zip file asynchronously
         zip.generateAsync({ type: "blob" })
