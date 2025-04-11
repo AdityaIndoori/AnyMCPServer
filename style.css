@@ -169,7 +169,7 @@ button.remove-btn {
     letter-spacing: normal;
 }
 button.remove-btn:hover {
-    background-color: darken(var(--error-color), 10%);
+    background-color: #9a001c; /* Darker red - Replaced invalid darken() */
 }
 
 /* Style Previous buttons differently */
