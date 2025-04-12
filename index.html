@@ -56,9 +56,13 @@
 
             <!-- Removed index.ts preview label and textarea -->
 
-            <p class="important-notice"> <!-- Added class, removed inline style -->
-                <strong>Important:</strong> After downloading, you **must** implement your custom tool logic in the generated <code>src/tool_logic.ts</code> file. Please read the generated <code>README.md</code> for detailed instructions before running the server.
-            </p>
+            <div class="important-notice"> <!-- Added class, removed inline style -->
+                <strong>Important:</strong><br>
+                <ul>
+                    <li>After downloading, you <b>must</b> implement your custom tool logic in <code>src/tool_logic.ts</code></li>
+                    <li>Please read the generated <code>README.md</code> for detailed instructions before running the server</li>
+                </ul>
+            </div>
             <hr>
             <button type="button" onclick="prevStep(3)">Previous</button>
         </div>
