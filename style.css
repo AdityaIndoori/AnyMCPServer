@@ -30,20 +30,34 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-h1 {
+header {
     text-align: center;
+    padding: 20px 0;
+    margin-bottom: 30px; /* Space between header and wizard */
+    /* Optional: Add a subtle bottom border */
+    /* border-bottom: 1px solid var(--border-color); */
+}
+
+header h1 {
     color: var(--primary-variant);
-    margin-bottom: 30px;
     font-weight: 600;
+    margin: 0 0 5px 0; /* Remove default margins, add small bottom margin */
+    font-size: 2.5rem; /* Slightly larger */
+}
+
+header p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-muted);
 }
 
 h2 {
     color: var(--primary-color);
     font-weight: 500;
     margin-top: 0;
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 10px;
+    margin-bottom: 25px; /* Increased margin */
+    /* border-bottom: 1px solid var(--border-color); */ /* Removed border */
+    padding-bottom: 0; /* Removed padding */
 }
 
 #wizard {
